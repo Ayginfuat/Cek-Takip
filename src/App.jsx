@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Plus, Calendar, DollarSign, TrendingUp, TrendingDown, X, Edit2, Trash2, QrCode, Copy, Check, Download, Smartphone, List, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Calendar, DollarSign, TrendingUp, TrendingDown, X, Edit2, Trash2, QrCode, Copy, Check, Download, Smartphone, List, ChevronLeft, ChevronRight, BarChart3, PieChart } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
+import { BarChart, Bar, LineChart, Line, PieChart as RechartsPieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 function App() {
   const [checks, setChecks] = useState([])
@@ -11,7 +12,7 @@ function App() {
   const [copied, setCopied] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [showInstallPrompt, setShowInstallPrompt] = useState(false)
-  const [viewMode, setViewMode] = useState('list') // 'list' veya 'calendar'
+  const [viewMode, setViewMode] = useState('list') // 'list', 'calendar' veya 'analysis'
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(null)
   const [formData, setFormData] = useState({
@@ -291,6 +292,154 @@ function App() {
            date.getMonth() === selectedDate.getMonth() &&
            date.getFullYear() === selectedDate.getFullYear()
   }
+
+  // Analiz fonksiyonları
+  const getMonthlyData = () => {
+    const monthlyData = {}
+    const today = new Date()
+    
+    checks.forEach(check => {
+      if (!check.dueDate) return
+      const dueDate = new Date(check.dueDate)
+      const monthKey = `${dueDate.getFullYear()}-${String(dueDate.getMonth() + 1).padStart(2, '0')}`
+      
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = {
+          month: dueDate.toLocaleDateString('tr-TR', { month: 'short', year: 'numeric' }),
+          outgoing: 0,
+          incoming: 0,
+          outgoingPaid: 0,
+          incomingReceived: 0
+        }
+      }
+      
+      if (check.type === 'outgoing') {
+        if (check.status === 'pending') {
+          monthlyData[monthKey].outgoing += check.amount
+        } else {
+          monthlyData[monthKey].outgoingPaid += check.amount
+        }
+      } else {
+        if (check.status === 'pending') {
+          monthlyData[monthKey].incoming += check.amount
+        } else {
+          monthlyData[monthKey].incomingReceived += check.amount
+        }
+      }
+    })
+    
+    return Object.values(monthlyData).sort((a, b) => {
+      const aDate = new Date(a.month)
+      const bDate = new Date(b.month)
+      return aDate - bDate
+    })
+  }
+
+  const getStatusData = () => {
+    const outgoingPending = outgoingChecks.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0)
+    const outgoingPaid = outgoingChecks.filter(c => c.status === 'paid').reduce((sum, c) => sum + c.amount, 0)
+    const incomingPending = incomingChecks.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0)
+    const incomingReceived = incomingChecks.filter(c => c.status === 'received').reduce((sum, c) => sum + c.amount, 0)
+    
+    return [
+      { name: 'Ödenecek', value: outgoingPending, color: '#ef4444' },
+      { name: 'Ödendi', value: outgoingPaid, color: '#22c55e' },
+      { name: 'Alınacak', value: incomingPending, color: '#3b82f6' },
+      { name: 'Alındı', value: incomingReceived, color: '#10b981' }
+    ].filter(item => item.value > 0)
+  }
+
+  const getBankData = () => {
+    const bankData = {}
+    
+    checks.forEach(check => {
+      const bank = check.bank || 'Banka Belirtilmemiş'
+      if (!bankData[bank]) {
+        bankData[bank] = { outgoing: 0, incoming: 0 }
+      }
+      
+      if (check.status === 'pending') {
+        if (check.type === 'outgoing') {
+          bankData[bank].outgoing += check.amount
+        } else {
+          bankData[bank].incoming += check.amount
+        }
+      }
+    })
+    
+    return Object.entries(bankData)
+      .map(([name, data]) => ({
+        name: name.length > 15 ? name.substring(0, 15) + '...' : name,
+        'Ödenecek': data.outgoing,
+        'Alınacak': data.incoming
+      }))
+      .sort((a, b) => (b['Ödenecek'] + b['Alınacak']) - (a['Ödenecek'] + a['Alınacak']))
+      .slice(0, 10) // En fazla 10 banka
+  }
+
+  const getDueDateAnalysis = () => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    const overdue = checks.filter(c => {
+      if (!c.dueDate || c.status !== 'pending') return false
+      const due = new Date(c.dueDate)
+      due.setHours(0, 0, 0, 0)
+      return due < today
+    }).reduce((sum, c) => sum + c.amount, 0)
+    
+    const thisWeek = checks.filter(c => {
+      if (!c.dueDate || c.status !== 'pending') return false
+      const due = new Date(c.dueDate)
+      due.setHours(0, 0, 0, 0)
+      const weekEnd = new Date(today)
+      weekEnd.setDate(weekEnd.getDate() + 7)
+      return due >= today && due <= weekEnd
+    }).reduce((sum, c) => sum + c.amount, 0)
+    
+    const thisMonth = checks.filter(c => {
+      if (!c.dueDate || c.status !== 'pending') return false
+      const due = new Date(c.dueDate)
+      due.setHours(0, 0, 0, 0)
+      const monthEnd = new Date(today)
+      monthEnd.setMonth(monthEnd.getMonth() + 1)
+      return due > weekEnd && due <= monthEnd
+    }).reduce((sum, c) => sum + c.amount, 0)
+    
+    const later = checks.filter(c => {
+      if (!c.dueDate || c.status !== 'pending') return false
+      const due = new Date(c.dueDate)
+      due.setHours(0, 0, 0, 0)
+      const monthEnd = new Date(today)
+      monthEnd.setMonth(monthEnd.getMonth() + 1)
+      return due > monthEnd
+    }).reduce((sum, c) => sum + c.amount, 0)
+    
+    return [
+      { name: 'Vadesi Geçmiş', value: overdue, color: '#ef4444' },
+      { name: 'Bu Hafta', value: thisWeek, color: '#f59e0b' },
+      { name: 'Bu Ay', value: thisMonth, color: '#3b82f6' },
+      { name: 'Daha Sonra', value: later, color: '#6b7280' }
+    ].filter(item => item.value > 0)
+  }
+
+  const getSummaryStats = () => {
+    const totalOutgoingPending = outgoingChecks.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0)
+    const totalOutgoingPaid = outgoingChecks.filter(c => c.status === 'paid').reduce((sum, c) => sum + c.amount, 0)
+    const totalIncomingPending = incomingChecks.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0)
+    const totalIncomingReceived = incomingChecks.filter(c => c.status === 'received').reduce((sum, c) => sum + c.amount, 0)
+    const netAmount = totalIncomingPending - totalOutgoingPending
+    
+    return {
+      totalOutgoingPending,
+      totalOutgoingPaid,
+      totalIncomingPending,
+      totalIncomingReceived,
+      netAmount
+    }
+  }
+
+  const COLORS = ['#ef4444', '#22c55e', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6']
 
   const CheckCard = ({ check }) => {
     const daysUntil = getDaysUntilDue(check.dueDate)
@@ -737,7 +886,7 @@ function App() {
         )}
 
         {/* Görünüm Modu Seçici */}
-        <div className="mb-4 sm:mb-6 flex gap-2">
+        <div className="mb-4 sm:mb-6 flex gap-2 flex-wrap">
           <button
             onClick={() => setViewMode('list')}
             className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold transition-colors min-h-[44px] flex items-center justify-center gap-2 ${
@@ -759,6 +908,17 @@ function App() {
           >
             <Calendar size={18} />
             <span>Takvim</span>
+          </button>
+          <button
+            onClick={() => setViewMode('analysis')}
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold transition-colors min-h-[44px] flex items-center justify-center gap-2 ${
+              viewMode === 'analysis'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <BarChart3 size={18} />
+            <span>Analiz</span>
           </button>
         </div>
 
@@ -926,6 +1086,130 @@ function App() {
                   <span className="text-gray-600">Bugün</span>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Analiz Görünümü */}
+        {viewMode === 'analysis' && (
+          <div className="space-y-4 sm:space-y-6">
+            {/* Özet İstatistikler */}
+            {(() => {
+              const stats = getSummaryStats()
+              return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-red-500">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Toplam Ödenecek</p>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-800">{formatCurrency(stats.totalOutgoingPending)}</p>
+                    <p className="text-xs text-gray-500 mt-1">{outgoingChecks.filter(c => c.status === 'pending').length} adet</p>
+                  </div>
+                  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-green-500">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Toplam Alınacak</p>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-800">{formatCurrency(stats.totalIncomingPending)}</p>
+                    <p className="text-xs text-gray-500 mt-1">{incomingChecks.filter(c => c.status === 'pending').length} adet</p>
+                  </div>
+                  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-blue-500">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Net Durum</p>
+                    <p className={`text-xl sm:text-2xl font-bold ${stats.netAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatCurrency(Math.abs(stats.netAmount))}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">{stats.netAmount >= 0 ? 'Alacak' : 'Borç'}</p>
+                  </div>
+                  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-purple-500">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Toplam İşlem</p>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-800">{formatCurrency(stats.totalOutgoingPaid + stats.totalIncomingReceived)}</p>
+                    <p className="text-xs text-gray-500 mt-1">Ödendi/Alındı</p>
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* Aylık Dağılım Grafiği */}
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <BarChart3 size={20} />
+                Aylık Dağılım
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={getMonthlyData()}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                  <Legend />
+                  <Bar dataKey="outgoing" fill="#ef4444" name="Ödenecek" />
+                  <Bar dataKey="incoming" fill="#3b82f6" name="Alınacak" />
+                  <Bar dataKey="outgoingPaid" fill="#22c55e" name="Ödendi" />
+                  <Bar dataKey="incomingReceived" fill="#10b981" name="Alındı" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Durum Dağılımı */}
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <PieChart size={20} />
+                Durum Dağılımı
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <RechartsPieChart>
+                  <Pie
+                    data={getStatusData()}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {getStatusData().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                </RechartsPieChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Banka Bazında Dağılım */}
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">Banka Bazında Dağılım</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={getBankData()} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={100} />
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                  <Legend />
+                  <Bar dataKey="Ödenecek" fill="#ef4444" />
+                  <Bar dataKey="Alınacak" fill="#3b82f6" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Vade Tarihi Analizi */}
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">Vade Tarihi Analizi</h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <RechartsPieChart>
+                  <Pie
+                    data={getDueDateAnalysis()}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {getDueDateAnalysis().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                </RechartsPieChart>
+              </ResponsiveContainer>
             </div>
           </div>
         )}

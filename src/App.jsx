@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Plus, Calendar, DollarSign, TrendingUp, TrendingDown, X, Edit2, Trash2, QrCode, Copy, Check, Download, Smartphone } from 'lucide-react'
+import { Plus, Calendar, DollarSign, TrendingUp, TrendingDown, X, Edit2, Trash2, QrCode, Copy, Check, Download, Smartphone, List, ChevronLeft, ChevronRight } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 
 function App() {
@@ -11,6 +11,9 @@ function App() {
   const [copied, setCopied] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [showInstallPrompt, setShowInstallPrompt] = useState(false)
+  const [viewMode, setViewMode] = useState('list') // 'list' veya 'calendar'
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  const [selectedDate, setSelectedDate] = useState(null)
   const [formData, setFormData] = useState({
     type: 'outgoing', // 'outgoing' = ödenecek, 'incoming' = alınacak
     amount: '',
@@ -203,6 +206,82 @@ function App() {
     const diffTime = due - today
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     return diffDays
+  }
+
+  // Takvim fonksiyonları
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear()
+    const month = date.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const daysInMonth = lastDay.getDate()
+    const startingDayOfWeek = firstDay.getDay()
+    
+    // Pazartesi başlangıcı için (0 = Pazartesi)
+    const adjustedStartingDay = startingDayOfWeek === 0 ? 6 : startingDayOfWeek - 1
+    
+    const days = []
+    
+    // Önceki ayın son günleri
+    const prevMonth = new Date(year, month, 0)
+    const prevMonthDays = prevMonth.getDate()
+    for (let i = adjustedStartingDay - 1; i >= 0; i--) {
+      days.push({
+        date: new Date(year, month - 1, prevMonthDays - i),
+        isCurrentMonth: false
+      })
+    }
+    
+    // Bu ayın günleri
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push({
+        date: new Date(year, month, i),
+        isCurrentMonth: true
+      })
+    }
+    
+    // Sonraki ayın ilk günleri (takvimi tamamlamak için)
+    const remainingDays = 42 - days.length // 6 hafta x 7 gün = 42
+    for (let i = 1; i <= remainingDays; i++) {
+      days.push({
+        date: new Date(year, month + 1, i),
+        isCurrentMonth: false
+      })
+    }
+    
+    return days
+  }
+
+  const getChecksForDate = (date) => {
+    if (!date) return []
+    const dateStr = date.toISOString().split('T')[0]
+    return checks.filter(check => {
+      if (!check.dueDate) return false
+      const checkDateStr = check.dueDate.split('T')[0]
+      return checkDateStr === dateStr
+    })
+  }
+
+  const getChecksCountForDate = (date) => {
+    return getChecksForDate(date).length
+  }
+
+  const navigateMonth = (direction) => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + direction, 1))
+  }
+
+  const isToday = (date) => {
+    const today = new Date()
+    return date.getDate() === today.getDate() &&
+           date.getMonth() === today.getMonth() &&
+           date.getFullYear() === today.getFullYear()
+  }
+
+  const isSelected = (date) => {
+    if (!selectedDate) return false
+    return date.getDate() === selectedDate.getDate() &&
+           date.getMonth() === selectedDate.getMonth() &&
+           date.getFullYear() === selectedDate.getFullYear()
   }
 
   const CheckCard = ({ check }) => {
@@ -649,7 +728,180 @@ function App() {
           </div>
         )}
 
+        {/* Görünüm Modu Seçici */}
+        <div className="mb-4 sm:mb-6 flex gap-2">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold transition-colors min-h-[44px] flex items-center justify-center gap-2 ${
+              viewMode === 'list'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <List size={18} />
+            <span>Liste</span>
+          </button>
+          <button
+            onClick={() => setViewMode('calendar')}
+            className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold transition-colors min-h-[44px] flex items-center justify-center gap-2 ${
+              viewMode === 'calendar'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            <Calendar size={18} />
+            <span>Takvim</span>
+          </button>
+        </div>
+
+        {/* Takvim Görünümü */}
+        {viewMode === 'calendar' && (
+          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-8">
+            {/* Takvim Başlığı */}
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <button
+                onClick={() => navigateMonth(-1)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+                {currentMonth.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}
+              </h2>
+              <button
+                onClick={() => navigateMonth(1)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
+
+            {/* Hafta Günleri */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+              {['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((day, index) => (
+                <div key={index} className="text-center text-xs sm:text-sm font-semibold text-gray-600 py-2">
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Takvim Günleri */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-2">
+              {getDaysInMonth(currentMonth).map((dayObj, index) => {
+                const checksCount = getChecksCountForDate(dayObj.date)
+                const dayChecks = getChecksForDate(dayObj.date)
+                const hasPendingChecks = dayChecks.some(c => c.status === 'pending')
+                const hasOverdueChecks = dayChecks.some(c => {
+                  const days = getDaysUntilDue(c.dueDate)
+                  return days !== null && days < 0 && c.status === 'pending'
+                })
+
+                return (
+                  <div
+                    key={index}
+                    onClick={() => {
+                      if (dayObj.isCurrentMonth) {
+                        setSelectedDate(dayObj.date)
+                      }
+                    }}
+                    className={`min-h-[60px] sm:min-h-[80px] p-1 sm:p-2 rounded-lg border-2 transition-all cursor-pointer ${
+                      !dayObj.isCurrentMonth
+                        ? 'bg-gray-50 text-gray-400 border-gray-100'
+                        : isSelected(dayObj.date)
+                        ? 'bg-blue-100 border-blue-500'
+                        : isToday(dayObj.date)
+                        ? 'bg-yellow-50 border-yellow-300'
+                        : 'bg-white border-gray-200 hover:border-blue-300'
+                    }`}
+                  >
+                    <div className="flex flex-col h-full">
+                      <div className={`text-xs sm:text-sm font-semibold mb-1 ${
+                        !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-gray-700'
+                      }`}>
+                        {dayObj.date.getDate()}
+                      </div>
+                      {checksCount > 0 && (
+                        <div className="flex flex-wrap gap-0.5 mt-auto">
+                          {dayChecks.slice(0, 3).map((check, idx) => (
+                            <div
+                              key={check.id}
+                              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
+                                check.status === 'paid' || check.status === 'received'
+                                  ? 'bg-green-400'
+                                  : hasOverdueChecks && check.status === 'pending'
+                                  ? 'bg-red-500'
+                                  : 'bg-blue-500'
+                              }`}
+                              title={`${check.bank} - ${formatCurrency(check.amount)}`}
+                            />
+                          ))}
+                          {checksCount > 3 && (
+                            <div className="text-[8px] sm:text-xs text-gray-500 font-semibold">
+                              +{checksCount - 3}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Seçili Günün Çekleri */}
+            {selectedDate && (
+              <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-base sm:text-lg font-bold text-gray-800">
+                    {formatDate(selectedDate.toISOString())} - Çekler
+                  </h3>
+                  <button
+                    onClick={() => setSelectedDate(null)}
+                    className="p-1 text-gray-500 hover:text-gray-700 rounded"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                {getChecksForDate(selectedDate).length === 0 ? (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    Bu tarihte çek bulunmuyor
+                  </p>
+                ) : (
+                  <div className="space-y-2 sm:space-y-3">
+                    {getChecksForDate(selectedDate).map(check => (
+                      <CheckCard key={check.id} check={check} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Renk Açıklamaları */}
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+              <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                  <span className="text-gray-600">Bekleyen Çek</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                  <span className="text-gray-600">Vadesi Geçmiş</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                  <span className="text-gray-600">Ödendi/Alındı</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-yellow-300 border-2 border-yellow-400"></div>
+                  <span className="text-gray-600">Bugün</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Çek Listeleri */}
+        {viewMode === 'list' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Ödenecek Çekler */}
           <div>
@@ -691,6 +943,7 @@ function App() {
             )}
           </div>
         </div>
+        )}
       </div>
     </div>
   )

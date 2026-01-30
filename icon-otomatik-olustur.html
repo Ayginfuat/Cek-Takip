@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otomatik İkon Oluşturucu</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+        h1 {
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+        .preview-area {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .preview-box {
+            text-align: center;
+            padding: 25px;
+            background: #f9fafb;
+            border-radius: 15px;
+            border: 2px solid #e5e7eb;
+        }
+        canvas {
+            border: 3px solid #ddd;
+            border-radius: 15px;
+            margin: 15px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            background: white;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 8px;
+            transition: all 0.3s;
+        }
+        button:hover { background: #1d4ed8; transform: translateY(-2px); }
+        .big-button {
+            font-size: 20px;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            margin: 20px auto;
+            display: block;
+        }
+        .success {
+            background: #10b981;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+            text-align: center;
+            font-weight: bold;
+        }
+        .instructions {
+            background: #e0f2fe;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📱 Otomatik İkon Oluşturucu</h1>
+        <p style="color: #6b7280;">Koyu lacivert arka plan, dairesel ok ve onay işareti</p>
+        
+        <div class="instructions">
+            <h3>📋 Talimatlar:</h3>
+            <ol>
+                <li>"İkonları Oluştur ve İndir" butonuna tıklayın</li>
+                <li>Her iki ikonu da indirin</li>
+                <li>İndirilen dosyaları <code>public</code> klasörüne kopyalayın</li>
+                <li>Sunucuyu yeniden başlatın</li>
+                <li>Telefonda cache temizleyip uygulamayı yeniden ekleyin</li>
+            </ol>
+        </div>
+
+        <div id="success" class="success">
+            ✅ İkonlar başarıyla oluşturuldu! Şimdi indirin.
+        </div>
+
+        <div class="preview-area">
+            <div class="preview-box">
+                <h3>📱 192x192 İkon</h3>
+                <canvas id="icon192" width="192" height="192"></canvas>
+                <br>
+                <button onclick="downloadIcon('icon192', 'icon-192.png')" id="btn192">💾 İndir (192x192)</button>
+            </div>
+            
+            <div class="preview-box">
+                <h3>📱 512x512 İkon</h3>
+                <canvas id="icon512" width="512" height="512"></canvas>
+                <br>
+                <button onclick="downloadIcon('icon512', 'icon-512.png')" id="btn512">💾 İndir (512x512)</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <button onclick="generateAll()" class="big-button">
+                🎨 İkonları Oluştur ve İndir
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function drawIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const cornerRadius = size * 0.1;
+            
+            // Koyu lacivert arka plan (gradient)
+            const bgGradient = ctx.createLinearGradient(0, 0, size, size);
+            bgGradient.addColorStop(0, '#1e3a8a'); // Koyu lacivert
+            bgGradient.addColorStop(0.3, '#1e40af');
+            bgGradient.addColorStop(0.7, '#1e40af');
+            bgGradient.addColorStop(1, '#1e3a8a');
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Yuvarlatılmış köşeler
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, cornerRadius);
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // Merkez noktası
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const radius = size * 0.35;
+            
+            // Dairesel ok - yeşil-mavi degrade
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            
+            // Dairesel ok yolu (sağ alttan başlayıp saat yönünün tersine)
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, Math.PI * 0.25, Math.PI * 2.25, false);
+            
+            // Ok için gradient (yeşil-mavi-yeşil)
+            const arrowGradient = ctx.createLinearGradient(-radius * 0.7, -radius * 0.7, radius * 0.7, radius * 0.7);
+            arrowGradient.addColorStop(0, '#10b981'); // Canlı yeşil
+            arrowGradient.addColorStop(0.4, '#3b82f6'); // Parlak mavi
+            arrowGradient.addColorStop(0.6, '#3b82f6'); // Parlak mavi
+            arrowGradient.addColorStop(1, '#10b981'); // Canlı yeşil
+            
+            ctx.strokeStyle = arrowGradient;
+            ctx.lineWidth = size * 0.08;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            
+            // Ok başı (üst kısımda sağa doğru)
+            const arrowAngle = Math.PI * 0.25;
+            const arrowX = Math.cos(arrowAngle) * radius;
+            const arrowY = Math.sin(arrowAngle) * radius;
+            
+            ctx.save();
+            ctx.translate(arrowX, arrowY);
+            ctx.rotate(arrowAngle + Math.PI / 2);
+            
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-size * 0.06, -size * 0.08);
+            ctx.lineTo(size * 0.06, -size * 0.08);
+            ctx.closePath();
+            ctx.fillStyle = '#10b981'; // Parlak yeşil
+            ctx.fill();
+            ctx.restore();
+            
+            // Onay işareti (tik) - parlak yeşil, dairesel okun içinde
+            ctx.beginPath();
+            const checkSize = size * 0.15;
+            const checkX = -size * 0.1;
+            const checkY = size * 0.05;
+            
+            // Tik çizgileri (sol alt ve sağ üst)
+            ctx.moveTo(checkX - checkSize * 0.3, checkY);
+            ctx.lineTo(checkX, checkY + checkSize * 0.4);
+            ctx.lineTo(checkX + checkSize * 0.5, checkY - checkSize * 0.2);
+            
+            ctx.strokeStyle = '#10b981'; // Parlak yeşil
+            ctx.lineWidth = size * 0.06;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+        
+        function generateAll() {
+            drawIcon('icon192', 192);
+            drawIcon('icon512', 512);
+            document.getElementById('success').style.display = 'block';
+        }
+        
+        function downloadIcon(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // roundRect polyfill
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+        
+        // Sayfa yüklendiğinde otomatik oluştur
+        window.onload = function() {
+            generateAll();
+        };
+    </script>
+</body>
+</html>

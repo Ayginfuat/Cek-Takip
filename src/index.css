@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Mobil için touch optimizasyonu */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Mobil için input ve select elemanlarını optimize et */
+input, select, textarea {
+  font-size: 16px !important; /* iOS zoom önleme */
+}
+
+/* Mobil için butonları daha büyük yap */
+@media (max-width: 640px) {
+  button {
+    min-height: 44px; /* Apple'ın önerdiği minimum dokunma alanı */
+  }
+}

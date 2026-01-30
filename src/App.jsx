@@ -814,7 +814,7 @@ function App() {
                         setSelectedDate(dayObj.date)
                       }
                     }}
-                    className={`min-h-[80px] sm:min-h-[100px] p-1 sm:p-2 rounded-lg border-2 transition-all cursor-pointer ${
+                    className={`min-h-[90px] sm:min-h-[110px] p-1 sm:p-2 rounded-lg border-2 transition-all cursor-pointer ${
                       !dayObj.isCurrentMonth
                         ? 'bg-gray-50 text-gray-400 border-gray-100'
                         : isSelected(dayObj.date)
@@ -837,7 +837,7 @@ function App() {
                             <span className={`font-medium truncate ${
                               !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-red-600'
                             }`}>
-                              Öd: {outgoingPending.length}
+                              {outgoingPending.length} adet ödenecek
                             </span>
                           </div>
                         )}
@@ -847,7 +847,7 @@ function App() {
                             <span className={`font-medium truncate ${
                               !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-green-600'
                             }`}>
-                              Al: {incomingPending.length}
+                              {incomingPending.length} adet alınacak
                             </span>
                           </div>
                         )}
@@ -857,7 +857,7 @@ function App() {
                             <span className={`font-medium truncate ${
                               !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-gray-600'
                             }`}>
-                              Ödendi: {outgoingChecks.filter(c => c.status === 'paid').length}
+                              {outgoingChecks.filter(c => c.status === 'paid').length} adet ödendi
                             </span>
                           </div>
                         )}
@@ -867,7 +867,7 @@ function App() {
                             <span className={`font-medium truncate ${
                               !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-gray-600'
                             }`}>
-                              Alındı: {incomingChecks.filter(c => c.status === 'received').length}
+                              {incomingChecks.filter(c => c.status === 'received').length} adet alındı
                             </span>
                           </div>
                         )}

@@ -25,6 +25,16 @@ function App() {
     status: 'pending' // 'pending', 'paid', 'received'
   })
 
+  // Mobil cihaz kontrolü
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   // LocalStorage'dan verileri yükle
   useEffect(() => {
     const savedChecks = localStorage.getItem('checks')
@@ -1159,19 +1169,41 @@ function App() {
                 Aylık Dağılım
               </h3>
               {getMonthlyData().length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={getMonthlyData()}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => formatCurrency(value)} />
-                    <Legend />
-                    <Bar dataKey="outgoing" fill="#ef4444" name="Ödenecek" />
-                    <Bar dataKey="incoming" fill="#3b82f6" name="Alınacak" />
-                    <Bar dataKey="outgoingPaid" fill="#22c55e" name="Ödendi" />
-                    <Bar dataKey="incomingReceived" fill="#10b981" name="Alındı" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="w-full" style={{ minHeight: '300px' }}>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={getMonthlyData()} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis 
+                        dataKey="month" 
+                        tick={{ fontSize: 12, fill: '#64748b' }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={60}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12, fill: '#64748b' }}
+                        width={60}
+                      />
+                      <Tooltip 
+                        formatter={(value) => formatCurrency(value)}
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          padding: '8px'
+                        }}
+                      />
+                      <Legend 
+                        wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                        iconSize={12}
+                      />
+                      <Bar dataKey="outgoing" fill="#ef4444" name="Ödenecek" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="incoming" fill="#3b82f6" name="Alınacak" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="outgoingPaid" fill="#22c55e" name="Ödendi" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="incomingReceived" fill="#10b981" name="Alındı" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-gray-500">
                   <p>Henüz veri bulunmuyor. Çek ekledikten sonra grafik görünecektir.</p>
@@ -1188,25 +1220,49 @@ function App() {
                 Durum Dağılımı
               </h3>
               {getStatusData().length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <RechartsPieChart>
-                    <Pie
-                      data={getStatusData()}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {getStatusData().map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => formatCurrency(value)} />
-                  </RechartsPieChart>
-                </ResponsiveContainer>
+                <div className="w-full" style={{ minHeight: '300px' }}>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <RechartsPieChart>
+                      <Pie
+                        data={getStatusData()}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => {
+                          if (isMobile) {
+                            return `${(percent * 100).toFixed(0)}%`
+                          }
+                          return `${name}: ${(percent * 100).toFixed(0)}%`
+                        }}
+                        outerRadius={isMobile ? 70 : 80}
+                        innerRadius={isMobile ? 20 : 30}
+                        fill="#8884d8"
+                        dataKey="value"
+                        style={{ fontSize: '12px' }}
+                      >
+                        {getStatusData().map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value) => formatCurrency(value)}
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          padding: '8px',
+                          fontSize: '12px'
+                        }}
+                      />
+                      <Legend 
+                        wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                        iconSize={12}
+                        layout="horizontal"
+                        verticalAlign="bottom"
+                      />
+                    </RechartsPieChart>
+                  </ResponsiveContainer>
+                </div>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-gray-500">
                   <p>Henüz veri bulunmuyor. Çek ekledikten sonra grafik görünecektir.</p>
@@ -1218,17 +1274,40 @@ function App() {
             <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 sm:p-7">
               <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent mb-5 sm:mb-6">Banka Bazında Dağılım</h3>
               {getBankData().length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={getBankData()} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis type="number" />
-                    <YAxis dataKey="name" type="category" width={100} />
-                    <Tooltip formatter={(value) => formatCurrency(value)} />
-                    <Legend />
-                    <Bar dataKey="Ödenecek" fill="#ef4444" />
-                    <Bar dataKey="Alınacak" fill="#3b82f6" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="w-full overflow-x-auto" style={{ minHeight: '300px' }}>
+                  <ResponsiveContainer width="100%" height={Math.max(300, getBankData().length * 40)}>
+                    <BarChart data={getBankData()} layout="vertical" margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis 
+                        type="number" 
+                        tick={{ fontSize: 12, fill: '#64748b' }}
+                        width={60}
+                      />
+                      <YAxis 
+                        dataKey="name" 
+                        type="category" 
+                        width={isMobile ? 80 : 120}
+                        tick={{ fontSize: 11, fill: '#64748b' }}
+                      />
+                      <Tooltip 
+                        formatter={(value) => formatCurrency(value)}
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          padding: '8px',
+                          fontSize: '12px'
+                        }}
+                      />
+                      <Legend 
+                        wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                        iconSize={12}
+                      />
+                      <Bar dataKey="Ödenecek" fill="#ef4444" radius={[0, 4, 4, 0]} />
+                      <Bar dataKey="Alınacak" fill="#3b82f6" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-gray-500">
                   <p>Henüz veri bulunmuyor. Çek ekledikten sonra grafik görünecektir.</p>
@@ -1240,25 +1319,49 @@ function App() {
             <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 sm:p-7">
               <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent mb-5 sm:mb-6">Vade Tarihi Analizi</h3>
               {getDueDateAnalysis().length > 0 ? (
-                <ResponsiveContainer width="100%" height={300}>
-                  <RechartsPieChart>
-                    <Pie
-                      data={getDueDateAnalysis()}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {getDueDateAnalysis().map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => formatCurrency(value)} />
-                  </RechartsPieChart>
-                </ResponsiveContainer>
+                <div className="w-full" style={{ minHeight: '300px' }}>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <RechartsPieChart>
+                      <Pie
+                        data={getDueDateAnalysis()}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => {
+                          if (isMobile) {
+                            return `${(percent * 100).toFixed(0)}%`
+                          }
+                          return `${name}: ${(percent * 100).toFixed(0)}%`
+                        }}
+                        outerRadius={isMobile ? 70 : 80}
+                        innerRadius={isMobile ? 20 : 30}
+                        fill="#8884d8"
+                        dataKey="value"
+                        style={{ fontSize: '12px' }}
+                      >
+                        {getDueDateAnalysis().map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip 
+                        formatter={(value) => formatCurrency(value)}
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '8px',
+                          padding: '8px',
+                          fontSize: '12px'
+                        }}
+                      />
+                      <Legend 
+                        wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }}
+                        iconSize={12}
+                        layout="horizontal"
+                        verticalAlign="bottom"
+                      />
+                    </RechartsPieChart>
+                  </ResponsiveContainer>
+                </div>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-gray-500">
                   <p>Henüz veri bulunmuyor. Vade tarihi olan çek ekledikten sonra grafik görünecektir.</p>

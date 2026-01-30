@@ -15,6 +15,7 @@ function App() {
   const [viewMode, setViewMode] = useState('list') // 'list', 'calendar' veya 'analysis'
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(null)
+  const [isMobile, setIsMobile] = useState(false)
   const [formData, setFormData] = useState({
     type: 'outgoing', // 'outgoing' = ödenecek, 'incoming' = alınacak
     amount: '',

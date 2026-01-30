@@ -447,14 +447,14 @@ function App() {
     const isDueSoon = daysUntil !== null && daysUntil >= 0 && daysUntil <= 7 && check.status === 'pending'
 
     return (
-      <div className={`bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4 ${
+      <div className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 p-4 sm:p-5 border-l-4 ${
         check.status === 'paid' || check.status === 'received' 
-          ? 'border-green-500 opacity-75' 
+          ? 'border-emerald-500 bg-emerald-50/30' 
           : isOverdue 
-          ? 'border-red-500' 
+          ? 'border-rose-500 bg-rose-50/30' 
           : isDueSoon 
-          ? 'border-yellow-500' 
-          : 'border-blue-500'
+          ? 'border-amber-500 bg-amber-50/30' 
+          : 'border-indigo-500 bg-indigo-50/20'
       }`}>
         <div className="flex justify-between items-start mb-2">
           <div className="flex-1 min-w-0 pr-2">
@@ -468,14 +468,14 @@ function App() {
           <div className="flex gap-1 sm:gap-2 flex-shrink-0">
             <button
               onClick={() => handleEdit(check)}
-              className="p-2 sm:p-1 text-blue-600 hover:bg-blue-50 active:bg-blue-100 rounded touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
+              className="p-2 sm:p-1.5 text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100 rounded-lg touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center transition-colors duration-200"
               title="Düzenle"
             >
               <Edit2 size={18} />
             </button>
             <button
               onClick={() => handleDelete(check.id)}
-              className="p-2 sm:p-1 text-red-600 hover:bg-red-50 active:bg-red-100 rounded touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center"
+              className="p-2 sm:p-1.5 text-rose-600 hover:bg-rose-50 active:bg-rose-100 rounded-lg touch-manipulation min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 flex items-center justify-center transition-colors duration-200"
               title="Sil"
             >
               <Trash2 size={18} />
@@ -484,7 +484,7 @@ function App() {
         </div>
         
         <div className="mb-2 sm:mb-3">
-          <p className="text-xl sm:text-2xl font-bold text-gray-900 break-words">
+          <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent break-words">
             {formatCurrency(check.amount)}
           </p>
         </div>
@@ -499,12 +499,12 @@ function App() {
               <Calendar size={14} className="sm:w-4 sm:h-4" />
               <span>{formatDate(check.dueDate)}</span>
               {daysUntil !== null && check.status === 'pending' && (
-                <span className={`px-2 py-0.5 rounded text-xs font-medium whitespace-nowrap ${
+                <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap ${
                   isOverdue 
-                    ? 'bg-red-100 text-red-700' 
+                    ? 'bg-rose-100 text-rose-700 border border-rose-200' 
                     : isDueSoon 
-                    ? 'bg-yellow-100 text-yellow-700' 
-                    : 'bg-gray-100 text-gray-700'
+                    ? 'bg-amber-100 text-amber-700 border border-amber-200' 
+                    : 'bg-slate-100 text-slate-700 border border-slate-200'
                 }`}>
                   {isOverdue ? `${Math.abs(daysUntil)} gün geçti` : `${daysUntil} gün kaldı`}
                 </span>
@@ -517,10 +517,10 @@ function App() {
           <select
             value={check.status}
             onChange={(e) => handleStatusChange(check.id, e.target.value)}
-            className={`flex-1 px-3 py-2.5 sm:py-2 rounded-md text-sm font-medium border min-h-[44px] sm:min-h-0 ${
+            className={`flex-1 px-4 py-2.5 sm:py-2.5 rounded-lg text-sm font-semibold border-2 min-h-[44px] sm:min-h-0 transition-all duration-200 ${
               check.status === 'paid' || check.status === 'received'
-                ? 'bg-green-50 text-green-700 border-green-300'
-                : 'bg-yellow-50 text-yellow-700 border-yellow-300'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                : 'bg-amber-50 text-amber-700 border-amber-300 hover:bg-amber-100'
             }`}
           >
             {check.type === 'outgoing' ? (
@@ -541,22 +541,22 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 pb-20 md:pb-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 pb-20 md:pb-6">
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
         {/* Header */}
-        <header className="mb-4 sm:mb-8">
+        <header className="mb-6 sm:mb-8">
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-1 sm:mb-2">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 bg-clip-text text-transparent mb-2 sm:mb-3">
                 Çek Takip Sistemi
               </h1>
-              <p className="text-sm sm:text-base text-gray-600">Ödenecek ve alınacak çeklerinizi kolayca takip edin</p>
+              <p className="text-sm sm:text-base text-slate-600 font-medium">Ödenecek ve alınacak çeklerinizi kolayca takip edin</p>
             </div>
             <div className="ml-4 flex gap-2">
               {(showInstallPrompt || deferredPrompt) && (
                 <button
                   onClick={handleInstallApp}
-                  className="p-2 sm:p-3 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white rounded-lg shadow-md transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
+                  className="p-2 sm:p-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 active:from-emerald-700 active:to-teal-800 text-white rounded-xl shadow-lg shadow-emerald-500/25 transition-all duration-200 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center hover:shadow-xl hover:shadow-emerald-500/30"
                   title="Ana Ekrana Ekle"
                 >
                   <Download size={20} />
@@ -564,7 +564,7 @@ function App() {
               )}
               <button
                 onClick={handleShowQR}
-                className="p-2 sm:p-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg shadow-md transition-colors touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="p-2 sm:p-3 bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700 active:from-indigo-700 active:to-blue-800 text-white rounded-xl shadow-lg shadow-indigo-500/25 transition-all duration-200 touch-manipulation min-h-[44px] min-w-[44px] flex items-center justify-center hover:shadow-xl hover:shadow-indigo-500/30"
                 title="Telefon için QR Kod"
               >
                 <QrCode size={20} />
@@ -576,7 +576,7 @@ function App() {
         {/* QR Kod Modal */}
         {showQR && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowQR(false)}>
-            <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 sm:p-8 max-w-sm w-full" onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-gray-800">Telefon ile Bağlan</h3>
                 <button
@@ -621,12 +621,12 @@ function App() {
                 </div>
               </div>
               
-              <button
-                onClick={() => setShowQR(false)}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-colors"
-              >
-                Kapat
-              </button>
+                <button
+                  onClick={() => setShowQR(false)}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white py-3 rounded-xl font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200"
+                >
+                  Kapat
+                </button>
             </div>
           </div>
         )}
@@ -634,7 +634,7 @@ function App() {
         {/* Ana Ekrana Ekle Talimatları Modal */}
         {showInstallPrompt && !deferredPrompt && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setShowInstallPrompt(false)}>
-            <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-6 sm:p-8 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                   <Smartphone size={24} />
@@ -680,7 +680,7 @@ function App() {
               
               <button
                 onClick={() => setShowInstallPrompt(false)}
-                className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-colors"
+                className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white py-3 rounded-xl font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200"
               >
                 Anladım
               </button>
@@ -689,40 +689,46 @@ function App() {
         )}
 
         {/* Özet Kartlar */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-8">
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-red-500">
-            <div className="flex items-center justify-between">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="bg-white rounded-2xl shadow-lg shadow-rose-500/10 p-5 sm:p-7 border border-rose-100 relative overflow-hidden group hover:shadow-xl hover:shadow-rose-500/15 transition-all duration-300">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-rose-100/50 to-transparent rounded-full -mr-16 -mt-16"></div>
+            <div className="relative flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm text-gray-600 mb-1">Ödenecek Çekler</p>
-                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 break-words">
+                <p className="text-xs sm:text-sm font-semibold text-rose-600 uppercase tracking-wide mb-2">Ödenecek Çekler</p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-rose-600 to-rose-700 bg-clip-text text-transparent break-words mb-1">
                   {formatCurrency(totalOutgoing)}
                 </p>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                <p className="text-xs sm:text-sm text-slate-500 mt-2 font-medium">
                   {outgoingChecks.filter(c => c.status === 'pending').length} adet bekleyen
                 </p>
               </div>
-              <TrendingDown className="text-red-500 flex-shrink-0 ml-2" size={32} />
+              <div className="p-3 bg-gradient-to-br from-rose-500 to-rose-600 rounded-xl shadow-lg shadow-rose-500/30 ml-4 group-hover:scale-110 transition-transform duration-300">
+                <TrendingDown className="text-white" size={28} />
+              </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-green-500">
-            <div className="flex items-center justify-between">
+          <div className="bg-white rounded-2xl shadow-lg shadow-emerald-500/10 p-5 sm:p-7 border border-emerald-100 relative overflow-hidden group hover:shadow-xl hover:shadow-emerald-500/15 transition-all duration-300">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-100/50 to-transparent rounded-full -mr-16 -mt-16"></div>
+            <div className="relative flex items-center justify-between">
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm text-gray-600 mb-1">Alınacak Çekler</p>
-                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 break-words">
+                <p className="text-xs sm:text-sm font-semibold text-emerald-600 uppercase tracking-wide mb-2">Alınacak Çekler</p>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent break-words mb-1">
                   {formatCurrency(totalIncoming)}
                 </p>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                <p className="text-xs sm:text-sm text-slate-500 mt-2 font-medium">
                   {incomingChecks.filter(c => c.status === 'pending').length} adet bekleyen
                 </p>
               </div>
-              <TrendingUp className="text-green-500 flex-shrink-0 ml-2" size={32} />
+              <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg shadow-emerald-500/30 ml-4 group-hover:scale-110 transition-transform duration-300">
+                <TrendingUp className="text-white" size={28} />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Çek Ekleme Butonu - Mobilde floating, desktop'ta normal */}
-        <div className="mb-4 sm:mb-6">
+        <div className="mb-6 sm:mb-8">
           <button
             onClick={() => {
               setShowForm(!showForm)
@@ -737,7 +743,7 @@ function App() {
                 status: 'pending'
               })
             }}
-            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-6 py-3.5 sm:py-3 rounded-lg font-semibold flex items-center justify-center gap-2 shadow-md transition-colors touch-manipulation min-h-[44px] text-base"
+            className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-600 hover:from-indigo-700 hover:via-blue-700 hover:to-indigo-700 active:from-indigo-800 active:via-blue-800 active:to-indigo-800 text-white px-8 py-4 sm:py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200 touch-manipulation min-h-[44px] text-base"
           >
             <Plus size={20} />
             <span>{showForm ? 'Formu Kapat' : 'Yeni Çek Ekle'}</span>
@@ -746,8 +752,8 @@ function App() {
 
         {/* Çek Ekleme/Düzenleme Formu */}
         {showForm && (
-          <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-4 sm:mb-8">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-5 sm:p-7 mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent mb-4 sm:mb-6">
               {editingCheck ? 'Çeki Düzenle' : 'Yeni Çek Ekle'}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
@@ -759,7 +765,7 @@ function App() {
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base min-h-[44px]"
+                    className="w-full px-4 py-3 sm:py-2.5 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base min-h-[44px] transition-all duration-200 bg-white hover:border-slate-300"
                     required
                   >
                     <option value="outgoing">Ödenecek Çek</option>
@@ -776,7 +782,7 @@ function App() {
                     step="0.01"
                     value={formData.amount}
                     onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base min-h-[44px]"
+                    className="w-full px-4 py-3 sm:py-2.5 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base min-h-[44px] transition-all duration-200 bg-white hover:border-slate-300"
                     placeholder="0.00"
                     required
                   />
@@ -790,7 +796,7 @@ function App() {
                     type="text"
                     value={formData.bank}
                     onChange={(e) => setFormData({ ...formData, bank: e.target.value })}
-                    className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base min-h-[44px]"
+                    className="w-full px-4 py-3 sm:py-2.5 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base min-h-[44px] transition-all duration-200 bg-white hover:border-slate-300"
                     placeholder="Banka adı"
                     required
                   />
@@ -804,7 +810,7 @@ function App() {
                     type="text"
                     value={formData.checkNumber}
                     onChange={(e) => setFormData({ ...formData, checkNumber: e.target.value })}
-                    className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base min-h-[44px]"
+                    className="w-full px-4 py-3 sm:py-2.5 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base min-h-[44px] transition-all duration-200 bg-white hover:border-slate-300"
                     placeholder="Çek numarası (opsiyonel)"
                   />
                 </div>
@@ -817,7 +823,7 @@ function App() {
                     type="date"
                     value={formData.dueDate}
                     onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                    className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base min-h-[44px]"
+                    className="w-full px-4 py-3 sm:py-2.5 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base min-h-[44px] transition-all duration-200 bg-white hover:border-slate-300"
                     required
                   />
                 </div>
@@ -829,7 +835,7 @@ function App() {
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-base min-h-[44px]"
+                    className="w-full px-4 py-3 sm:py-2.5 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base min-h-[44px] transition-all duration-200 bg-white hover:border-slate-300"
                   >
                     <option value="pending">
                       {formData.type === 'outgoing' ? 'Ödenecek' : 'Alınacak'}
@@ -857,7 +863,7 @@ function App() {
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-6 py-3 rounded-lg font-semibold transition-colors touch-manipulation min-h-[44px] text-base"
+                  className="flex-1 sm:flex-none bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 active:from-indigo-800 active:to-blue-800 text-white px-8 py-3 rounded-xl font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200 touch-manipulation min-h-[44px] text-base"
                 >
                   {editingCheck ? 'Güncelle' : 'Kaydet'}
                 </button>
@@ -876,7 +882,7 @@ function App() {
                       status: 'pending'
                     })
                   }}
-                  className="flex-1 sm:flex-none bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-800 px-6 py-3 rounded-lg font-semibold transition-colors touch-manipulation min-h-[44px] text-base"
+                  className="flex-1 sm:flex-none bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 border-2 border-slate-200 px-8 py-3 rounded-xl font-semibold transition-all duration-200 touch-manipulation min-h-[44px] text-base"
                 >
                   İptal
                 </button>
@@ -889,10 +895,10 @@ function App() {
         <div className="mb-4 sm:mb-6 flex gap-2 flex-wrap">
           <button
             onClick={() => setViewMode('list')}
-            className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold transition-colors min-h-[44px] flex items-center justify-center gap-2 ${
+            className={`flex-1 sm:flex-none px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 min-h-[44px] flex items-center justify-center gap-2 ${
               viewMode === 'list'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
             }`}
           >
             <List size={18} />
@@ -900,10 +906,10 @@ function App() {
           </button>
           <button
             onClick={() => setViewMode('calendar')}
-            className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold transition-colors min-h-[44px] flex items-center justify-center gap-2 ${
+            className={`flex-1 sm:flex-none px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 min-h-[44px] flex items-center justify-center gap-2 ${
               viewMode === 'calendar'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
             }`}
           >
             <Calendar size={18} />
@@ -911,10 +917,10 @@ function App() {
           </button>
           <button
             onClick={() => setViewMode('analysis')}
-            className={`flex-1 sm:flex-none px-4 py-2 rounded-lg font-semibold transition-colors min-h-[44px] flex items-center justify-center gap-2 ${
+            className={`flex-1 sm:flex-none px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 min-h-[44px] flex items-center justify-center gap-2 ${
               viewMode === 'analysis'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ? 'bg-gradient-to-r from-indigo-600 to-blue-600 text-white shadow-lg shadow-indigo-500/30'
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200'
             }`}
           >
             <BarChart3 size={18} />
@@ -924,30 +930,30 @@ function App() {
 
         {/* Takvim Görünümü */}
         {viewMode === 'calendar' && (
-          <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-8">
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 sm:p-7 mb-6 sm:mb-8">
             {/* Takvim Başlığı */}
-            <div className="flex items-center justify-between mb-4 sm:mb-6">
+            <div className="flex items-center justify-between mb-5 sm:mb-6">
               <button
                 onClick={() => navigateMonth(-1)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2.5 hover:bg-slate-100 rounded-xl transition-all duration-200 hover:scale-110"
               >
-                <ChevronLeft size={20} />
+                <ChevronLeft size={20} className="text-slate-700" />
               </button>
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800">
+              <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent">
                 {currentMonth.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })}
               </h2>
               <button
                 onClick={() => navigateMonth(1)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2.5 hover:bg-slate-100 rounded-xl transition-all duration-200 hover:scale-110"
               >
-                <ChevronRight size={20} />
+                <ChevronRight size={20} className="text-slate-700" />
               </button>
             </div>
 
             {/* Hafta Günleri */}
-            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-3">
               {['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].map((day, index) => (
-                <div key={index} className="text-center text-xs sm:text-sm font-semibold text-gray-600 py-2">
+                <div key={index} className="text-center text-xs sm:text-sm font-bold text-slate-600 py-2.5 bg-slate-50 rounded-lg">
                   {day}
                 </div>
               ))}
@@ -974,19 +980,19 @@ function App() {
                         setSelectedDate(dayObj.date)
                       }
                     }}
-                    className={`min-h-[90px] sm:min-h-[110px] p-1 sm:p-2 rounded-lg border-2 transition-all cursor-pointer ${
+                    className={`min-h-[90px] sm:min-h-[110px] p-1.5 sm:p-2.5 rounded-xl border-2 transition-all duration-200 cursor-pointer ${
                       !dayObj.isCurrentMonth
-                        ? 'bg-gray-50 text-gray-400 border-gray-100'
+                        ? 'bg-slate-50 text-slate-400 border-slate-100'
                         : isSelected(dayObj.date)
-                        ? 'bg-blue-100 border-blue-500'
+                        ? 'bg-gradient-to-br from-indigo-100 to-blue-100 border-indigo-400 shadow-md'
                         : isToday(dayObj.date)
-                        ? 'bg-yellow-50 border-yellow-300'
-                        : 'bg-white border-gray-200 hover:border-blue-300'
+                        ? 'bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-300 shadow-sm'
+                        : 'bg-white border-slate-200 hover:border-indigo-300 hover:shadow-md'
                     }`}
                   >
                     <div className="flex flex-col h-full">
-                      <div className={`text-xs sm:text-sm font-semibold mb-1 ${
-                        !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-gray-700'
+                      <div className={`text-xs sm:text-sm font-bold mb-1.5 ${
+                        !dayObj.isCurrentMonth ? 'text-slate-400' : isToday(dayObj.date) ? 'text-amber-700' : 'text-slate-800'
                       }`}>
                         {dayObj.date.getDate()}
                       </div>
@@ -994,8 +1000,8 @@ function App() {
                         {outgoingPending.length > 0 && (
                           <div className="flex items-center gap-0.5 sm:gap-1">
                             <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 flex-shrink-0"></div>
-                            <span className={`font-medium truncate ${
-                              !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-red-600'
+                            <span className={`font-semibold truncate text-[9px] sm:text-xs ${
+                              !dayObj.isCurrentMonth ? 'text-slate-400' : 'text-rose-700'
                             }`}>
                               {outgoingPending.length} adet ödenecek
                             </span>
@@ -1003,29 +1009,29 @@ function App() {
                         )}
                         {incomingPending.length > 0 && (
                           <div className="flex items-center gap-0.5 sm:gap-1">
-                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500 flex-shrink-0"></div>
-                            <span className={`font-medium truncate ${
-                              !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-green-600'
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 flex-shrink-0 shadow-sm"></div>
+                            <span className={`font-semibold truncate text-[9px] sm:text-xs ${
+                              !dayObj.isCurrentMonth ? 'text-slate-400' : 'text-emerald-700'
                             }`}>
                               {incomingPending.length} adet alınacak
                             </span>
                           </div>
                         )}
                         {outgoingChecks.filter(c => c.status === 'paid').length > 0 && (
-                          <div className="flex items-center gap-0.5 sm:gap-1 opacity-60">
-                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400 flex-shrink-0"></div>
-                            <span className={`font-medium truncate ${
-                              !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-gray-600'
+                          <div className="flex items-center gap-0.5 sm:gap-1 opacity-70">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-400 flex-shrink-0"></div>
+                            <span className={`font-semibold truncate text-[9px] sm:text-xs ${
+                              !dayObj.isCurrentMonth ? 'text-slate-400' : 'text-slate-600'
                             }`}>
                               {outgoingChecks.filter(c => c.status === 'paid').length} adet ödendi
                             </span>
                           </div>
                         )}
                         {incomingChecks.filter(c => c.status === 'received').length > 0 && (
-                          <div className="flex items-center gap-0.5 sm:gap-1 opacity-60">
-                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400 flex-shrink-0"></div>
-                            <span className={`font-medium truncate ${
-                              !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-gray-600'
+                          <div className="flex items-center gap-0.5 sm:gap-1 opacity-70">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-slate-400 flex-shrink-0"></div>
+                            <span className={`font-semibold truncate text-[9px] sm:text-xs ${
+                              !dayObj.isCurrentMonth ? 'text-slate-400' : 'text-slate-600'
                             }`}>
                               {incomingChecks.filter(c => c.status === 'received').length} adet alındı
                             </span>
@@ -1067,23 +1073,23 @@ function App() {
             )}
 
             {/* Renk Açıklamaları */}
-            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
+            <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-slate-200">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs sm:text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <span className="text-gray-600">Ödenecek Çek</span>
+                <div className="flex items-center gap-2 bg-rose-50 px-3 py-2 rounded-lg border border-rose-100">
+                  <div className="w-3 h-3 rounded-full bg-rose-500 shadow-sm"></div>
+                  <span className="text-slate-700 font-medium">Ödenecek Çek</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                  <span className="text-gray-600">Alınacak Çek</span>
+                <div className="flex items-center gap-2 bg-emerald-50 px-3 py-2 rounded-lg border border-emerald-100">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm"></div>
+                  <span className="text-slate-700 font-medium">Alınacak Çek</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-gray-400"></div>
-                  <span className="text-gray-600">Ödendi/Alındı</span>
+                <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100">
+                  <div className="w-3 h-3 rounded-full bg-slate-400"></div>
+                  <span className="text-slate-700 font-medium">Ödendi/Alındı</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-yellow-300 border-2 border-yellow-400"></div>
-                  <span className="text-gray-600">Bugün</span>
+                <div className="flex items-center gap-2 bg-amber-50 px-3 py-2 rounded-lg border border-amber-100">
+                  <div className="w-3 h-3 rounded-full bg-amber-400 border-2 border-amber-500"></div>
+                  <span className="text-slate-700 font-medium">Bugün</span>
                 </div>
               </div>
             </div>
@@ -1094,16 +1100,18 @@ function App() {
         {viewMode === 'analysis' && (
           <div className="space-y-4 sm:space-y-6">
             {checks.length === 0 && (
-              <div className="bg-white rounded-lg shadow-md p-8 text-center">
-                <BarChart3 className="mx-auto mb-4 text-gray-400" size={48} />
-                <h3 className="text-xl font-bold text-gray-800 mb-2">Henüz Çek Eklenmemiş</h3>
-                <p className="text-gray-600 mb-4">Analiz grafiklerini görmek için önce çek eklemeniz gerekiyor.</p>
+              <div className="bg-gradient-to-br from-slate-50 to-indigo-50/30 rounded-2xl shadow-lg border border-slate-200 p-10 sm:p-12 text-center">
+                <div className="p-5 bg-white rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center shadow-lg">
+                  <BarChart3 className="text-indigo-500" size={40} />
+                </div>
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent mb-3">Henüz Çek Eklenmemiş</h3>
+                <p className="text-slate-600 mb-6 font-medium">Analiz grafiklerini görmek için önce çek eklemeniz gerekiyor.</p>
                 <button
                   onClick={() => {
                     setViewMode('list')
                     setShowForm(true)
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                  className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white px-8 py-3.5 rounded-xl font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200"
                 >
                   İlk Çeki Ekle
                 </button>
@@ -1115,37 +1123,39 @@ function App() {
                 {(() => {
               const stats = getSummaryStats()
               return (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-red-500">
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Toplam Ödenecek</p>
-                    <p className="text-xl sm:text-2xl font-bold text-gray-800">{formatCurrency(stats.totalOutgoingPending)}</p>
-                    <p className="text-xs text-gray-500 mt-1">{outgoingChecks.filter(c => c.status === 'pending').length} adet</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  <div className="bg-white rounded-2xl shadow-lg shadow-rose-500/10 p-5 sm:p-6 border border-rose-100 hover:shadow-xl hover:shadow-rose-500/15 transition-all duration-300">
+                    <p className="text-xs sm:text-sm font-semibold text-rose-600 uppercase tracking-wide mb-2">Toplam Ödenecek</p>
+                    <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-rose-600 to-rose-700 bg-clip-text text-transparent mb-1">{formatCurrency(stats.totalOutgoingPending)}</p>
+                    <p className="text-xs text-slate-500 mt-2 font-medium">{outgoingChecks.filter(c => c.status === 'pending').length} adet</p>
                   </div>
-                  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-green-500">
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Toplam Alınacak</p>
-                    <p className="text-xl sm:text-2xl font-bold text-gray-800">{formatCurrency(stats.totalIncomingPending)}</p>
-                    <p className="text-xs text-gray-500 mt-1">{incomingChecks.filter(c => c.status === 'pending').length} adet</p>
+                  <div className="bg-white rounded-2xl shadow-lg shadow-emerald-500/10 p-5 sm:p-6 border border-emerald-100 hover:shadow-xl hover:shadow-emerald-500/15 transition-all duration-300">
+                    <p className="text-xs sm:text-sm font-semibold text-emerald-600 uppercase tracking-wide mb-2">Toplam Alınacak</p>
+                    <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-1">{formatCurrency(stats.totalIncomingPending)}</p>
+                    <p className="text-xs text-slate-500 mt-2 font-medium">{incomingChecks.filter(c => c.status === 'pending').length} adet</p>
                   </div>
-                  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-blue-500">
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Net Durum</p>
-                    <p className={`text-xl sm:text-2xl font-bold ${stats.netAmount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className="bg-white rounded-2xl shadow-lg shadow-indigo-500/10 p-5 sm:p-6 border border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/15 transition-all duration-300">
+                    <p className="text-xs sm:text-sm font-semibold text-indigo-600 uppercase tracking-wide mb-2">Net Durum</p>
+                    <p className={`text-2xl sm:text-3xl font-bold bg-gradient-to-r bg-clip-text text-transparent mb-1 ${stats.netAmount >= 0 ? 'from-emerald-600 to-teal-600' : 'from-rose-600 to-rose-700'}`}>
                       {formatCurrency(Math.abs(stats.netAmount))}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">{stats.netAmount >= 0 ? 'Alacak' : 'Borç'}</p>
+                    <p className={`text-xs mt-2 font-medium ${stats.netAmount >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>{stats.netAmount >= 0 ? 'Alacak' : 'Borç'}</p>
                   </div>
-                  <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 border-l-4 border-purple-500">
-                    <p className="text-xs sm:text-sm text-gray-600 mb-1">Toplam İşlem</p>
-                    <p className="text-xl sm:text-2xl font-bold text-gray-800">{formatCurrency(stats.totalOutgoingPaid + stats.totalIncomingReceived)}</p>
-                    <p className="text-xs text-gray-500 mt-1">Ödendi/Alındı</p>
+                  <div className="bg-white rounded-2xl shadow-lg shadow-purple-500/10 p-5 sm:p-6 border border-purple-100 hover:shadow-xl hover:shadow-purple-500/15 transition-all duration-300">
+                    <p className="text-xs sm:text-sm font-semibold text-purple-600 uppercase tracking-wide mb-2">Toplam İşlem</p>
+                    <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-1">{formatCurrency(stats.totalOutgoingPaid + stats.totalIncomingReceived)}</p>
+                    <p className="text-xs text-slate-500 mt-2 font-medium">Ödendi/Alındı</p>
                   </div>
                 </div>
               )
             })()}
 
             {/* Aylık Dağılım Grafiği */}
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <BarChart3 size={20} />
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 sm:p-7">
+              <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent mb-5 sm:mb-6 flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-lg shadow-md">
+                  <BarChart3 size={20} className="text-white" />
+                </div>
                 Aylık Dağılım
               </h3>
               {getMonthlyData().length > 0 ? (
@@ -1170,9 +1180,11 @@ function App() {
             </div>
 
             {/* Durum Dağılımı */}
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <PieChart size={20} />
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 sm:p-7">
+              <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent mb-5 sm:mb-6 flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg shadow-md">
+                  <PieChart size={20} className="text-white" />
+                </div>
                 Durum Dağılımı
               </h3>
               {getStatusData().length > 0 ? (
@@ -1203,8 +1215,8 @@ function App() {
             </div>
 
             {/* Banka Bazında Dağılım */}
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">Banka Bazında Dağılım</h3>
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 sm:p-7">
+              <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent mb-5 sm:mb-6">Banka Bazında Dağılım</h3>
               {getBankData().length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={getBankData()} layout="vertical">
@@ -1225,8 +1237,8 @@ function App() {
             </div>
 
             {/* Vade Tarihi Analizi */}
-            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
-              <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">Vade Tarihi Analizi</h3>
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 sm:p-7">
+              <h3 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-700 bg-clip-text text-transparent mb-5 sm:mb-6">Vade Tarihi Analizi</h3>
               {getDueDateAnalysis().length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <RechartsPieChart>
@@ -1263,14 +1275,16 @@ function App() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Ödenecek Çekler */}
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
-              <TrendingDown className="text-red-500 flex-shrink-0" size={20} />
+            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-rose-600 to-rose-700 bg-clip-text text-transparent mb-4 sm:mb-5 flex items-center gap-2">
+              <TrendingDown className="text-rose-500 flex-shrink-0" size={22} />
               <span>Ödenecek Çekler</span>
             </h2>
             {outgoingChecks.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-md p-6 sm:p-8 text-center text-gray-500">
-                <DollarSign className="mx-auto mb-2 text-gray-400" size={40} />
-                <p className="text-sm sm:text-base">Henüz ödenecek çek eklenmemiş</p>
+              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl shadow-md border border-slate-200 p-8 sm:p-10 text-center">
+                <div className="p-4 bg-white rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center shadow-md">
+                  <DollarSign className="text-slate-400" size={32} />
+                </div>
+                <p className="text-sm sm:text-base font-medium text-slate-600">Henüz ödenecek çek eklenmemiş</p>
               </div>
             ) : (
               <div className="space-y-3 sm:space-y-4">
@@ -1283,14 +1297,16 @@ function App() {
 
           {/* Alınacak Çekler */}
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
-              <TrendingUp className="text-green-500 flex-shrink-0" size={20} />
+            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4 sm:mb-5 flex items-center gap-2">
+              <TrendingUp className="text-emerald-500 flex-shrink-0" size={22} />
               <span>Alınacak Çekler</span>
             </h2>
             {incomingChecks.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-md p-6 sm:p-8 text-center text-gray-500">
-                <DollarSign className="mx-auto mb-2 text-gray-400" size={40} />
-                <p className="text-sm sm:text-base">Henüz alınacak çek eklenmemiş</p>
+              <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl shadow-md border border-slate-200 p-8 sm:p-10 text-center">
+                <div className="p-4 bg-white rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center shadow-md">
+                  <DollarSign className="text-slate-400" size={32} />
+                </div>
+                <p className="text-sm sm:text-base font-medium text-slate-600">Henüz alınacak çek eklenmemiş</p>
               </div>
             ) : (
               <div className="space-y-3 sm:space-y-4">

@@ -266,6 +266,14 @@ function App() {
     return getChecksForDate(date).length
   }
 
+  const getOutgoingChecksForDate = (date) => {
+    return getChecksForDate(date).filter(check => check.type === 'outgoing')
+  }
+
+  const getIncomingChecksForDate = (date) => {
+    return getChecksForDate(date).filter(check => check.type === 'incoming')
+  }
+
   const navigateMonth = (direction) => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + direction, 1))
   }
@@ -788,9 +796,11 @@ function App() {
             {/* Takvim Günleri */}
             <div className="grid grid-cols-7 gap-1 sm:gap-2">
               {getDaysInMonth(currentMonth).map((dayObj, index) => {
-                const checksCount = getChecksCountForDate(dayObj.date)
                 const dayChecks = getChecksForDate(dayObj.date)
-                const hasPendingChecks = dayChecks.some(c => c.status === 'pending')
+                const outgoingChecks = getOutgoingChecksForDate(dayObj.date)
+                const incomingChecks = getIncomingChecksForDate(dayObj.date)
+                const outgoingPending = outgoingChecks.filter(c => c.status === 'pending')
+                const incomingPending = incomingChecks.filter(c => c.status === 'pending')
                 const hasOverdueChecks = dayChecks.some(c => {
                   const days = getDaysUntilDue(c.dueDate)
                   return days !== null && days < 0 && c.status === 'pending'
@@ -804,7 +814,7 @@ function App() {
                         setSelectedDate(dayObj.date)
                       }
                     }}
-                    className={`min-h-[60px] sm:min-h-[80px] p-1 sm:p-2 rounded-lg border-2 transition-all cursor-pointer ${
+                    className={`min-h-[80px] sm:min-h-[100px] p-1 sm:p-2 rounded-lg border-2 transition-all cursor-pointer ${
                       !dayObj.isCurrentMonth
                         ? 'bg-gray-50 text-gray-400 border-gray-100'
                         : isSelected(dayObj.date)
@@ -820,28 +830,48 @@ function App() {
                       }`}>
                         {dayObj.date.getDate()}
                       </div>
-                      {checksCount > 0 && (
-                        <div className="flex flex-wrap gap-0.5 mt-auto">
-                          {dayChecks.slice(0, 3).map((check, idx) => (
-                            <div
-                              key={check.id}
-                              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
-                                check.status === 'paid' || check.status === 'received'
-                                  ? 'bg-green-400'
-                                  : hasOverdueChecks && check.status === 'pending'
-                                  ? 'bg-red-500'
-                                  : 'bg-blue-500'
-                              }`}
-                              title={`${check.bank} - ${formatCurrency(check.amount)}`}
-                            />
-                          ))}
-                          {checksCount > 3 && (
-                            <div className="text-[8px] sm:text-xs text-gray-500 font-semibold">
-                              +{checksCount - 3}
-                            </div>
-                          )}
-                        </div>
-                      )}
+                      <div className="flex flex-col gap-0.5 sm:gap-1 mt-auto text-[8px] sm:text-xs">
+                        {outgoingPending.length > 0 && (
+                          <div className="flex items-center gap-0.5 sm:gap-1">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 flex-shrink-0"></div>
+                            <span className={`font-medium truncate ${
+                              !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-red-600'
+                            }`}>
+                              Öd: {outgoingPending.length}
+                            </span>
+                          </div>
+                        )}
+                        {incomingPending.length > 0 && (
+                          <div className="flex items-center gap-0.5 sm:gap-1">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-green-500 flex-shrink-0"></div>
+                            <span className={`font-medium truncate ${
+                              !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-green-600'
+                            }`}>
+                              Al: {incomingPending.length}
+                            </span>
+                          </div>
+                        )}
+                        {outgoingChecks.filter(c => c.status === 'paid').length > 0 && (
+                          <div className="flex items-center gap-0.5 sm:gap-1 opacity-60">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400 flex-shrink-0"></div>
+                            <span className={`font-medium truncate ${
+                              !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-gray-600'
+                            }`}>
+                              Ödendi: {outgoingChecks.filter(c => c.status === 'paid').length}
+                            </span>
+                          </div>
+                        )}
+                        {incomingChecks.filter(c => c.status === 'received').length > 0 && (
+                          <div className="flex items-center gap-0.5 sm:gap-1 opacity-60">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-400 flex-shrink-0"></div>
+                            <span className={`font-medium truncate ${
+                              !dayObj.isCurrentMonth ? 'text-gray-400' : 'text-gray-600'
+                            }`}>
+                              Alındı: {incomingChecks.filter(c => c.status === 'received').length}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )
@@ -878,17 +908,17 @@ function App() {
 
             {/* Renk Açıklamaları */}
             <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
-              <div className="flex flex-wrap gap-3 sm:gap-4 text-xs sm:text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                  <span className="text-gray-600">Bekleyen Çek</span>
-                </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 text-xs sm:text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                  <span className="text-gray-600">Vadesi Geçmiş</span>
+                  <span className="text-gray-600">Ödenecek Çek</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                  <span className="text-gray-600">Alınacak Çek</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-gray-400"></div>
                   <span className="text-gray-600">Ödendi/Alındı</span>
                 </div>
                 <div className="flex items-center gap-2">

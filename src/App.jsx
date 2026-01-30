@@ -1093,8 +1093,26 @@ function App() {
         {/* Analiz Görünümü */}
         {viewMode === 'analysis' && (
           <div className="space-y-4 sm:space-y-6">
-            {/* Özet İstatistikler */}
-            {(() => {
+            {checks.length === 0 && (
+              <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                <BarChart3 className="mx-auto mb-4 text-gray-400" size={48} />
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Henüz Çek Eklenmemiş</h3>
+                <p className="text-gray-600 mb-4">Analiz grafiklerini görmek için önce çek eklemeniz gerekiyor.</p>
+                <button
+                  onClick={() => {
+                    setViewMode('list')
+                    setShowForm(true)
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                >
+                  İlk Çeki Ekle
+                </button>
+              </div>
+            )}
+            {checks.length > 0 && (
+              <>
+                {/* Özet İstatistikler */}
+                {(() => {
               const stats = getSummaryStats()
               return (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -1130,19 +1148,25 @@ function App() {
                 <BarChart3 size={20} />
                 Aylık Dağılım
               </h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={getMonthlyData()}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                  <Legend />
-                  <Bar dataKey="outgoing" fill="#ef4444" name="Ödenecek" />
-                  <Bar dataKey="incoming" fill="#3b82f6" name="Alınacak" />
-                  <Bar dataKey="outgoingPaid" fill="#22c55e" name="Ödendi" />
-                  <Bar dataKey="incomingReceived" fill="#10b981" name="Alındı" />
-                </BarChart>
-              </ResponsiveContainer>
+              {getMonthlyData().length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={getMonthlyData()}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="month" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
+                    <Legend />
+                    <Bar dataKey="outgoing" fill="#ef4444" name="Ödenecek" />
+                    <Bar dataKey="incoming" fill="#3b82f6" name="Alınacak" />
+                    <Bar dataKey="outgoingPaid" fill="#22c55e" name="Ödendi" />
+                    <Bar dataKey="incomingReceived" fill="#10b981" name="Alındı" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-gray-500">
+                  <p>Henüz veri bulunmuyor. Çek ekledikten sonra grafik görünecektir.</p>
+                </div>
+              )}
             </div>
 
             {/* Durum Dağılımı */}
@@ -1151,66 +1175,86 @@ function App() {
                 <PieChart size={20} />
                 Durum Dağılımı
               </h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <RechartsPieChart>
-                  <Pie
-                    data={getStatusData()}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {getStatusData().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                </RechartsPieChart>
-              </ResponsiveContainer>
+              {getStatusData().length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsPieChart>
+                    <Pie
+                      data={getStatusData()}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {getStatusData().map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-gray-500">
+                  <p>Henüz veri bulunmuyor. Çek ekledikten sonra grafik görünecektir.</p>
+                </div>
+              )}
             </div>
 
             {/* Banka Bazında Dağılım */}
             <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
               <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">Banka Bazında Dağılım</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={getBankData()} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" width={100} />
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                  <Legend />
-                  <Bar dataKey="Ödenecek" fill="#ef4444" />
-                  <Bar dataKey="Alınacak" fill="#3b82f6" />
-                </BarChart>
-              </ResponsiveContainer>
+              {getBankData().length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={getBankData()} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" width={100} />
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
+                    <Legend />
+                    <Bar dataKey="Ödenecek" fill="#ef4444" />
+                    <Bar dataKey="Alınacak" fill="#3b82f6" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-gray-500">
+                  <p>Henüz veri bulunmuyor. Çek ekledikten sonra grafik görünecektir.</p>
+                </div>
+              )}
             </div>
 
             {/* Vade Tarihi Analizi */}
             <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
               <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">Vade Tarihi Analizi</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <RechartsPieChart>
-                  <Pie
-                    data={getDueDateAnalysis()}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {getDueDateAnalysis().map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                </RechartsPieChart>
-              </ResponsiveContainer>
+              {getDueDateAnalysis().length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <RechartsPieChart>
+                    <Pie
+                      data={getDueDateAnalysis()}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {getDueDateAnalysis().map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
+                  </RechartsPieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[300px] flex items-center justify-center text-gray-500">
+                  <p>Henüz veri bulunmuyor. Vade tarihi olan çek ekledikten sonra grafik görünecektir.</p>
+                </div>
+              )}
             </div>
+              </>
+            )}
           </div>
         )}
 
